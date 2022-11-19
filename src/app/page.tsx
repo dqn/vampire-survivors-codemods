@@ -1,7 +1,9 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
+import type { SubmitHandler } from "react-hook-form";
 import { DropEventListener, Dropzone } from "./Dropzone";
+import { Form, FormValues } from "./Form";
 
 function readFile(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -13,7 +15,9 @@ function readFile(file: File): Promise<string> {
 }
 
 const Page: React.FC = () => {
-  const onDrop = useCallback<DropEventListener>((acceptedFiles) => {
+  const [src, setSrc] = useState("");
+
+  const handleDrop = useCallback<DropEventListener>((acceptedFiles) => {
     const file = acceptedFiles[0];
 
     if (file === undefined) {
@@ -22,7 +26,12 @@ const Page: React.FC = () => {
 
     readFile(file).then((text) => {
       console.log(text);
+      setSrc(text);
     });
+  }, []);
+
+  const handleSubmit = useCallback<SubmitHandler<FormValues>>((values) => {
+    console.log(values);
   }, []);
 
   return (
@@ -31,7 +40,13 @@ const Page: React.FC = () => {
         Vampire Survivors Codemods
       </h1>
 
-      <Dropzone onDrop={onDrop} />
+      {src === "" ? (
+        <Dropzone onDrop={handleDrop} />
+      ) : (
+        <div className="mx-auto max-w-sm">
+          <Form onSubmit={handleSubmit} />
+        </div>
+      )}
     </main>
   );
 };
