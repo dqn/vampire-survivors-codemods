@@ -1,18 +1,12 @@
 "use client";
 
+import fileDownload from "js-file-download";
 import { useCallback, useState } from "react";
 import type { SubmitHandler } from "react-hook-form";
+import { modifyCode } from "../helpers/modifyCode";
+import { readFile } from "../helpers/readFile";
 import { DropEventListener, Dropzone } from "./Dropzone";
 import { Form, FormValues } from "./Form";
-
-function readFile(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsText(file);
-  });
-}
 
 const Page: React.FC = () => {
   const [src, setSrc] = useState("");
@@ -24,15 +18,15 @@ const Page: React.FC = () => {
       return;
     }
 
-    readFile(file).then((text) => {
-      console.log(text);
-      setSrc(text);
-    });
+    readFile(file).then(setSrc);
   }, []);
 
-  const handleSubmit = useCallback<SubmitHandler<FormValues>>((values) => {
-    console.log(values);
-  }, []);
+  const handleSubmit = useCallback<SubmitHandler<FormValues>>(
+    (values) => {
+      fileDownload(modifyCode(src, values), "main.bundle.js");
+    },
+    [src]
+  );
 
   return (
     <main className="mx-auto max-w-screen-md p-5">
